@@ -10,8 +10,16 @@ dotenv.config();
 connectDB();
 
 const app = express();
+
+// ✅ Correct way to enable CORS
+app.use(cors({
+    origin: "http://localhost:3000", // Allow frontend
+    credentials: true, // Allow cookies & auth headers
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"]
+}));
+
 app.use(express.json());
-app.use(cors());
 
 // Routes
 app.use("/api/auth", authRoutes);
