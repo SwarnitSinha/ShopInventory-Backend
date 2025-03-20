@@ -5,6 +5,8 @@ import { connectDB } from "./config/db";
 import authRoutes from "./routes/auth.routes";
 import productRoutes from "./routes/product.routes";
 import saleRoutes from "./routes/sale.routes";
+import buyerRoutes from "./routes/buyer.routes";
+import townRoutes from "./routes/town.routes";
 
 dotenv.config();
 connectDB();
@@ -25,5 +27,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/sales", saleRoutes);
+app.use("/api/buyers", buyerRoutes);
+app.use("/api/towns", townRoutes);
 
 export default app;
