@@ -30,8 +30,8 @@ export const SaleService = {
   },
 
   // Soft delete a sale by ID
-  deleteSale: async (id: string) => {
-    const deletedSale = await SaleRepository.deleteSale(id);
+  deleteSale: async (data: any) => {
+    const deletedSale = await SaleRepository.deleteSale(data);
     if (!deletedSale) {
       throw new Error('Sale not found');
     }

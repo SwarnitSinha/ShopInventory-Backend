@@ -4,7 +4,9 @@ import { Town } from "../models/town.model"; // Import the Town model if not alr
 export const BuyerRepository = {
   // Retrieve all buyers
   getAllBuyers: async () => {
-    const buyers = await Buyer.find().populate('town');
+    const buyers = await Buyer.find()
+        .populate('town')
+        .sort({name: 1});
     return buyers.map(buyer => ({
       ...buyer.toObject(),
       id: buyer._id,

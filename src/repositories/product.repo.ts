@@ -2,7 +2,7 @@ import { Product } from "../models/product.model";
 
 export const ProductRepository = {
         getAllProducts: async () => {
-                const products = await Product.find();
+                const products = await Product.find().sort({ name: 1 });
                 return products.map(product => ({
                         ...product.toObject(),
                         id: product._id,

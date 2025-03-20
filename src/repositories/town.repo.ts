@@ -4,7 +4,7 @@ import mongoose from 'mongoose'
 export const TownRepository = {
   // Retrieve all towns
   getAllTowns: async () => {
-    const towns = await Town.find();
+    const towns = await Town.find().sort({ name: 1 });
     return towns.map(town => ({
       ...town.toObject(),
       id: town._id,

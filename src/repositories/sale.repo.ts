@@ -4,7 +4,7 @@ import { Product } from '../models/product.model'; // Import the Product model
 export const SaleRepository = {
   // Retrieve all sales
   getAllSales: async () => {
-    return await Sale.find({ isDeleted: false }).populate('buyer product');
+    return await Sale.find({ isDeleted: false }).populate('buyer product').sort({ createdAt: -1 });
   },
 
   // Retrieve a sale by ID
@@ -65,14 +65,15 @@ export const SaleRepository = {
    },
 
   // Soft delete a sale by ID
-  deleteSale: async (id: string) => {
-    return await Sale.findByIdAndUpdate(id, { isDeleted: true }, { new: true });
+  deleteSale: async (data: any) => {
+    return await Sale.findByIdAndUpdate(data.id, { isDeleted: true }, { new: true });
   },
 
   // Method to retrieve sales based on a filter
   getSalesByFilter: async (filter: any) => {
     return await Sale.find(filter)
       .populate('buyer product')
+      .sort({ createdAt: -1 })
       .exec();
   },
 };

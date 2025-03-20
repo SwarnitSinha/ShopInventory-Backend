@@ -6,11 +6,11 @@ const router = express.Router();
 // Get all sales
 router.get('/', SaleController.getSales);
 
+// Filter sales (must come before `/:id`)
+router.get('/filter', SaleController.filterSales);
+
 // Get a sale by ID
 router.get('/:id', SaleController.getSaleById);
-
-//filter
-router.get('/filter', SaleController.filterSales);
 
 // Create a new sale
 router.post('/', SaleController.createSale);
@@ -18,7 +18,7 @@ router.post('/', SaleController.createSale);
 // Update a sale by ID
 router.patch('/:id', SaleController.updateSale);
 
-// Soft delete a sale by ID
-router.delete('/:id', SaleController.deleteSale);
+// Soft delete a sale
+router.delete('/delete', SaleController.deleteSale);
 
 export default router;
