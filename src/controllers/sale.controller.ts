@@ -1,125 +1,164 @@
 import { Request, Response } from 'express';
-import { SaleService } from '../services/sale.service';
+import { SaleService, InsertSaleDto, UpdateSaleDto } from '../services/sale.service';
 import mongoose from "mongoose"
-import {Buyer} from '../models/buyer.model';
+import { Buyer } from '../models/buyer.model';
+import { Product } from '../models/product.model';
+import { Town } from '../models/town.model';
+import { ok } from 'assert';
 
 export const SaleController = {
   // Get all sales
-  getSales: async (req: Request, res: Response) => {
+  /**
+   * Get all sales with pagination
+   * @param req Express request object
+   * @param res Express response object
+   */
+  async getSales(req: Request, res: Response): Promise<void> {
     try {
-      const sales = await SaleService.getAllSales();
-      res.status(200).json(sales);
+      const { page, limit } = req.query;
+
+      const result = await SaleService.getAllSales({
+        page: page as string,
+        limit: limit as string
+      });
+
+      res.status(200).json({
+        success: true,
+        message: 'Sales retrieved successfully',
+        data: result.sales,
+        metadata: {
+          total: result.total,
+          pages: result.pages,
+          currentPage: page ? Number(page) : 1,
+          limit: limit ? Number(limit) : 10
+        }
+      });
     } catch (error) {
-        res.status(500).json({ message: "Error getting sale", error });
+      res.status(400).json({
+        success: false,
+        message: error instanceof Error ? error.message : 'Failed to retrieve sales',
+      });
     }
   },
 
-  // Get a sale by ID
-  getSaleById: async (req: Request, res: Response) => {
+  /**
+   * Get a sale by ID
+   * @param req Express request object
+   * @param res Express response object
+   */
+  async getSaleById(req: Request, res: Response): Promise<void> {
     try {
-      const sale = await SaleService.getSaleById(req.params.id);
-      res.status(200).json(sale);
+      const { id } = req.params;
+
+      if (!id) {
+        res.status(400).json({
+          success: false,
+          message: 'Sale ID is required'
+        });
+        return;
+      }
+
+      const sale = await SaleService.getSaleById(id);
+
+      res.status(200).json({
+        success: true,
+        message: 'Sale retrieved successfully',
+        data: sale
+      });
     } catch (error) {
-        res.status(404).json({ message: "No record find!", error });
+      const status = error instanceof Error && error.message.includes('not found') ? 404 : 400;
+
+      res.status(status).json({
+        success: false,
+        message: error instanceof Error ? error.message : 'Failed to retrieve sale',
+      });
     }
   },
 
-  // Create a new sale
-  createSale: async (req: Request, res: Response) => {
+  async createSale(req: Request, res: Response): Promise<void> {
     try {
-      const newSale = await SaleService.createSale(req.body);
-      res.status(201).json(newSale);
+      const saleData: InsertSaleDto = req.body;
+
+      // Parse date string to Date object if provided
+      if (saleData.saleDate && typeof saleData.saleDate === 'string') {
+        saleData.saleDate = new Date(saleData.saleDate);
+      }
+
+      const sale = await SaleService.createSale(saleData);
+
+      res.status(201).json({
+        success: true,
+        message: 'Sale created successfully',
+        data: sale
+      });
     } catch (error) {
-        res.status(400).json({ message: "Error creating sale", error });
+      res.status(400).json({
+        success: false,
+        message: error instanceof Error ? error.message : 'Failed to create sale',
+      });
     }
   },
 
-  // Update a sale by ID
-  updateSale: async (req: Request, res: Response) => {
+  /**
+  * Update a sale by ID
+  * @param req Express request object
+  * @param res Express response object
+  */
+  async updateSale(req: Request, res: Response): Promise<void> {
     try {
-      const updatedSale = await SaleService.updateSale(req.params.id, req.body);
-      res.status(200).json(updatedSale);
+      const { id } = req.params;
+      const updateData: UpdateSaleDto = req.body;
+
+      if (!id) {
+        res.status(400).json({
+          success: false,
+          message: 'Sale ID is required'
+        });
+        return;
+      }
+
+      const updatedSale = await SaleService.updateSale(id, updateData);
+
+      res.status(200).json({
+        success: true,
+        message: 'Sale updated successfully',
+        data: updatedSale
+      });
     } catch (error) {
-        res.status(404).json({ message: "Error updating sale", error });
+      const status = error instanceof Error && error.message.includes('not found') ? 404 : 400;
+
+      res.status(status).json({
+        success: false,
+        message: error instanceof Error ? error.message : 'Failed to update sale',
+      });
     }
   },
 
   // Soft delete a sale by ID
   deleteSale: async (req: Request, res: Response) => {
     try {
-      await SaleService.deleteSale(req.body);
+      const saleId = req.params.id;
+      if (!saleId) {
+        res.status(400).json({ message: 'Sale ID is required' });
+        return;
+      }
+      const sale = await SaleService.getSaleById(saleId);
+      console.log("\n\nSale to delete:", sale);
+      await SaleService.deleteSale(sale);
       res.status(200).json({ message: 'Sale deleted successfully' });
     } catch (error) {
-        res.status(404).json({ message: "Error deleting sale", error });
+      res.status(404).json({ message: "Error deleting sale", error });
     }
   },
 
-  // Method to filter sales based on query parameters
-  filterSales: async (req: Request, res: Response): Promise<void> => {
-        try {
-            // Log the query parameters
-            console.log("Query Parameters:", req.query);
-    
-            // Extract query parameters
-            const { buyer, product, town, startDate, endDate } = req.query;
-    
-            // Construct filter object
-            const filter: any = {};
-    
-            // Handle buyer filter
-            if (buyer) {
-                if (mongoose.Types.ObjectId.isValid(buyer as string)) {
-                    filter.buyer = new mongoose.Types.ObjectId(buyer as string); // Use as ObjectId if valid
-                } else {
-                    // Find buyers whose names partially match the query
-                const buyerDocs = await Buyer.find({ name: { $regex: buyer as string, $options: 'i' } });
-                if (buyerDocs.length > 0) {
-                    filter.buyer = { $in: buyerDocs.map(buyerDoc => buyerDoc._id) }; // Use the ObjectIds of matching buyers
-                } else {
-// If buyer not found, return an empty array
-res.status(200).json([]);                        return;
-                    }
-                }
-            }
-    
-            // Handle product filter
-            if (product) {
-                if (mongoose.Types.ObjectId.isValid(product as string)) {
-                    filter.product = new mongoose.Types.ObjectId(product as string); // Use as ObjectId if valid
-                } else {
-                        res.status(400).json({ message: `Invalid product ID: "${product}".` });
-                        return;
-                }
-            }
-    
-            // Handle town filter (if applicable)
-            if (town) {
-                if (mongoose.Types.ObjectId.isValid(town as string)) {
-                    filter.town = new mongoose.Types.ObjectId(town as string); // Use as ObjectId if valid
-                } else {
-                        res.status(400).json({ message: `Invalid town ID: "${town}".` });
-                        return; 
-                }
-            }
-    
-            // Handle date range filtering
-            if (startDate || endDate) {
-                filter.saleDate = {};
-                if (startDate) filter.saleDate.$gte = new Date(startDate as string);
-                if (endDate) filter.saleDate.$lte = new Date(endDate as string);
-            }
-    
-            console.log("Constructed Filter:", filter);
-    
-            // Fetch filtered sales from the service
-            const sales = await SaleService.getFilteredSales(filter);
-    
-            // Respond with the filtered sales
-            res.status(200).json(sales);
-        } catch (error) {
-            console.error("Error in filterSales:", error);
-            res.status(500).json({ message: "Internal Server Error.", error });
-        }
-    },
+  searchSales: async (req: Request , res: Response ) =>{
+console.log(" req recieved: ",req.query);
+const {buyerName, townName, productName,invoiceNumber,startDate,endDate} = req.query;
+console.log(buyerName, townName, productName,invoiceNumber,startDate,endDate);
+  const sales = await SaleService.searchSales(req.query);
+res.status(200).json(sales);
+
+},
+  
 
 };

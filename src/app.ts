@@ -7,6 +7,7 @@ import productRoutes from "./routes/product.routes";
 import saleRoutes from "./routes/sale.routes";
 import buyerRoutes from "./routes/buyer.routes";
 import townRoutes from "./routes/town.routes";
+import path from "path";
 
 dotenv.config();
 connectDB();
@@ -29,5 +30,8 @@ app.use("/api/products", productRoutes);
 app.use("/api/sales", saleRoutes);
 app.use("/api/buyers", buyerRoutes);
 app.use("/api/towns", townRoutes);
+// Serve the uploads directory as static files
+app.use("/uploads", express.static(path.join("C:/DISK SWARNIT/Shop Inventory/uploads")));
+
 
 export default app;
