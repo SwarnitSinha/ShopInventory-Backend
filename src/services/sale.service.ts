@@ -73,7 +73,6 @@ export const SaleService = {
       if (isNaN(limit) || limit < 1 || limit > 100) {
         throw new Error('Invalid limit parameter (must be between 1 and 100)');
       }
-      console.log(page,limit);
       return await SaleRepository.getAllSales(page, limit);
     } catch (error) {
       throw new Error(`Service error: ${error instanceof Error ? error.message : String(error)}`);
@@ -119,10 +118,7 @@ export const SaleService = {
     for (const p of preparedData.products) {
       const product = await Product.findById(p.product);
       if (!product) throw new Error("Product not found");
-      console.log("prev quantity: ", product.quantity);
-      console.log("quantity to be decreased: ", p.quantity);
       product.quantity -= p.quantity;
-      console.log("new quantity: ", product.quantity);
 
       if (product.quantity < 0) {
         throw new Error("Available quantity is less.");

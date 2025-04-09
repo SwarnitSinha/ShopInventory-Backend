@@ -6,7 +6,6 @@ import { AuthService } from "../services/auth.service";
 export const userLogin = async (req: Request, res: Response) => {
   try {
     const response = await LoginService.validateUser(req.body);
-    console.log("Error is not coming.")
     res.status(200).json(response);
   } catch (error) {
     res.status(401).json({ message: "Invalid credentials", error });

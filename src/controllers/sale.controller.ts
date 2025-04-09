@@ -143,7 +143,6 @@ export const SaleController = {
         return;
       }
       const sale = await SaleService.getSaleById(saleId);
-      console.log("\n\nSale to delete:", sale);
       await SaleService.deleteSale(sale);
       res.status(200).json({ message: 'Sale deleted successfully' });
     } catch (error) {
@@ -152,9 +151,7 @@ export const SaleController = {
   },
 
   searchSales: async (req: Request , res: Response ) =>{
-console.log(" req recieved: ",req.query);
 const {buyerName, townName, productName,invoiceNumber,startDate,endDate} = req.query;
-console.log(buyerName, townName, productName,invoiceNumber,startDate,endDate);
   const sales = await SaleService.searchSales(req.query);
 res.status(200).json(sales);
 

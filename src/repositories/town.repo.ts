@@ -44,12 +44,10 @@ export const TownRepository = {
       const collections = await db.listCollections({ name: oldName }).toArray();
   
       if (collections.length === 0) {
-        console.log(`Collection '${oldName}' does not exist.`);
         return { success: false, message: `Collection '${oldName}' does not exist.` };
       }
   
       await db.collection(oldName).rename(newName);
-      console.log(`Collection renamed from '${oldName}' to '${newName}'`);
       return { success: true, message: `Collection renamed from '${oldName}' to '${newName}'` };
     } catch (error) {
       console.error('Error renaming collection:', error);

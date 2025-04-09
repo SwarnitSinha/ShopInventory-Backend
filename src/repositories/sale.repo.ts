@@ -26,7 +26,6 @@ export const SaleRepository = {
   async createSale(saleData: Partial<ISale>): Promise<ISale> {
     try {
       const sale = new Sale(saleData);
-      console.log(sale);
       return await sale.save();
     } catch (error) {
       console.log(error);
@@ -56,7 +55,6 @@ export const SaleRepository = {
   async getAllSales(page: number = 1, limit: number = 10): Promise<{ sales: ISale[], total: number, pages: number }> {
     try {
       const skip = (page - 1) * limit;
-      console.log("in repo:: ",page, limit, skip);
       const [sales, total] = await Promise.all([
         Sale.find({ isDeleted: false })
           .sort({ saleDate: -1 })
@@ -68,7 +66,6 @@ export const SaleRepository = {
         Sale.countDocuments()
       ]);
 
-      console.log(sales.length);
       
       return {
         sales,
@@ -127,12 +124,10 @@ export const SaleRepository = {
   },
 
   async search(query: any) {
-    console.log(query);
     const sale =  await Sale.find(query).sort({ createdAt: -1 })
     .populate('buyer')
     .populate('buyer.town', 'name')
     .populate('products.product', 'name price');
-    console.log(sale);
     return sale;
   }
 };
