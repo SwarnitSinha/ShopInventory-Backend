@@ -1,24 +1,63 @@
 import express from 'express';
 import { SaleController } from '../controllers/sale.controller';
+import { validateSaleBody, validateObjectId } from '../middleware/validate-request.middleware';
 
 const router = express.Router();
 
-// Get all sales
-router.get('/', SaleController.getSales);
+// Soft delete a sale
+router.post('/delete/:id', validateObjectId('id'), SaleController.deleteSale);
 
-// Get a sale by ID
-router.get('/:id', SaleController.getSaleById);
+/**
+ * @route GET /api/sales
+ * @description Get all sales with pagination
+ * @access Private
+ */
+router.get(
+    '/', 
+    SaleController.getSales.bind(SaleController)
+  );
+  
+  
+  
+  /**
+   * @route POST /api/sales
+   * @description Create a new sale
+   * @access Private
+   */
+  router.post(
+    '/',
+    validateSaleBody,
+    SaleController.createSale.bind(SaleController)
+  );
 
-//filter
-router.get('/filter', SaleController.filterSales);
+   router.get('/filter',SaleController.searchSales.bind(SaleController));
+  
+  /**
+   * @route GET /api/sales/:id
+   * @description Get a sale by ID
+   * @access Private
+   */
+  router.get(
+    '/:id', 
+    validateObjectId('id'),
+    SaleController.getSaleById.bind(SaleController)
+  );
+  
+  /**
+   * @route PATCH /api/sales/:id
+   * @description Update a sale by ID
+   * @access Private
+   */
+  router.patch(
+    '/:id',
+    validateObjectId('id'),
+    SaleController.updateSale.bind(SaleController)
+  );
+
+
 
 // Create a new sale
-router.post('/', SaleController.createSale);
+router.post( '/',validateSaleBody, SaleController.createSale.bind(SaleController)  );
 
-// Update a sale by ID
-router.patch('/:id', SaleController.updateSale);
-
-// Soft delete a sale by ID
-router.delete('/:id', SaleController.deleteSale);
 
 export default router;
