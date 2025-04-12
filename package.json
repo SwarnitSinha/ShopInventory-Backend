@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "node build/server.ts",
+    "start": "node build/server.js",
     "dev": "nodemon --watch src --ext ts --exec ts-node src/server.ts",
     "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -40,5 +40,5 @@
     "url": "https://github.com/swarnitEy/ShopInventory-Backend/issues"
   },
   "homepage": "https://github.com/swarnitEy/ShopInventory-Backend#readme",
-  "description": ""
+  "description": "A simple inventory management system for a shop, built with Node.js, Express, and MongoDB. It allows users to manage products, categories, and suppliers."
 }
