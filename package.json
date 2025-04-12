@@ -40,5 +40,5 @@
     "url": "https://github.com/swarnitEy/ShopInventory-Backend/issues"
   },
   "homepage": "https://github.com/swarnitEy/ShopInventory-Backend#readme",
-  "description": ""
+  "description": "A simple inventory management system for a shop, built with Node.js, Express, and MongoDB. It allows users to manage products, categories, and suppliers."
 }
