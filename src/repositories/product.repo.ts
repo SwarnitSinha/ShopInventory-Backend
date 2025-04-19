@@ -2,7 +2,7 @@ import { Product } from "../models/product.model";
 
 export const ProductRepository = {
         getAllProducts: async () => {
-                const products = await Product.find().sort({ name: 1 });
+                const products = await Product.find({isDeleted: false}).sort({ name: 1 });
                 return products.map(product => ({
                         ...product.toObject(),
                         id: product._id,
@@ -20,8 +20,11 @@ export const ProductRepository = {
                 
         },
         deleteProduct: async (id: string) => {
-                const deletedProduct = await Product.findByIdAndDelete(id);
-                if (!deletedProduct) throw new Error("Product not found");
+                const productToBeDeleted = await Product.findById(id);
+                if (!productToBeDeleted) throw new Error("Product not found");
+                productToBeDeleted.isDeleted = true;
+                productToBeDeleted.updatedAt = new Date();
+                productToBeDeleted.save();
                 return { message: "Product deleted successfully" };
         },
         searchProductsByName: async (query: string) => {

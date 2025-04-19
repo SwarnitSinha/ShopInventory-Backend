@@ -7,8 +7,16 @@ const ProductSchema = new mongoose.Schema({
         purchasePrice: { type: Number, required: true, min: 0 },
         regularPrice: { type: Number, required: true, min: 0 },
         bulkPrice: { type: Number, required: true, min: 0 },
-        imageUrl: { type: String, trim: true } 
+        imageUrl: { type: String, trim: true },
+        isDeleted: {type: Boolean, default: false},
+        createdAt: { type: Date, default: Date.now },
+        updatedAt: { type: Date, default: Date.now },
 });
+
+ProductSchema.pre('findOneAndUpdate', function(next) {
+        this.set({ updatedAt: new Date() });
+        next();
+      });
 
 export const Product = mongoose.model("Product", ProductSchema);
 
