@@ -23,8 +23,9 @@ export interface ISalePopulated extends Omit<ISale, 'buyer'>  {
 export const SaleRepository = {
 
   // Create a new sale
-  async createSale(saleData: Partial<ISale>): Promise<ISale> {
+  async createSale(saleData: Partial<ISale>, shopId:string): Promise<ISale> {
     try {
+      saleData.shopId = shopId; // Set the shopId from the request
       const sale = new Sale(saleData);
       return await sale.save();
     } catch (error) {
@@ -38,7 +39,7 @@ export const SaleRepository = {
   },
 
   // Soft delete a sale by ID
-  deleteSale: async (data: any) => {
+  deleteSale: async (data: any, shopId:string) => {
     return await Sale.findByIdAndUpdate(data.id, { isDeleted: true }, { new: true });
   },
   
@@ -52,18 +53,23 @@ export const SaleRepository = {
    * @param limit Number of items per page (default: 10)
    * @returns Array of sale documents with pagination metadata
    */
-  async getAllSales(page: number = 1, limit: number = 10): Promise<{ sales: ISale[], total: number, pages: number }> {
+  async getAllSales(page: number = 1, limit: number = 10, shopId:string): Promise<{ sales: ISale[], total: number, pages: number }> {
     try {
       const skip = (page - 1) * limit;
+
+      // Define the query filter
+      const query = { shopId: shopId, isDeleted: false };
+
+
       const [sales, total] = await Promise.all([
-        Sale.find({ isDeleted: false })
+        Sale.find(query)
           .sort({ saleDate: -1 })
           .skip(skip)
           .limit(limit)
           .populate('buyer')
           .populate('buyer.town', 'name')
           .populate('products.product', 'name price'),
-        Sale.countDocuments()
+        Sale.countDocuments(query)
       ]);
 
       
@@ -82,7 +88,7 @@ export const SaleRepository = {
    * @param id Sale ID
    * @returns Sale document or null if not found
    */
-  async getSaleById(id: string): Promise<ISale | null> {
+  async getSaleById(id: string, shopId:string): Promise<ISale | null> {
     try {
       if (!mongoose.Types.ObjectId.isValid(id)) {
         throw new Error('Invalid sale ID');
@@ -102,7 +108,7 @@ export const SaleRepository = {
    * @param updateData Data to update the sale with
    * @returns Updated sale document or null if not found
    */
-  async updateSale(id: string, updateData: Partial<ISale>): Promise<ISale | null> {
+  async updateSale(id: string, updateData: Partial<ISale>, shopId:string): Promise<ISale | null> {
     try {
       if (!mongoose.Types.ObjectId.isValid(id)) {
         throw new Error('Invalid sale ID');

@@ -1,12 +1,8 @@
-import { User } from "../models/user.model";
+import { Shop } from "../models/shop.model";
 
 export const AuthService = {
   async getUserById(userId: string) {
-    return await User.findById(userId).select("-password"); // Exclude password field
-  },
-
-  async logout(userId: any) {
-    console.log(`User ${userId} logged out`); // Optional: Implement token revocation
+    return await Shop.findById(userId).select("-password"); // Exclude password field
   },
 
   async refreshToken(oldToken: string) {

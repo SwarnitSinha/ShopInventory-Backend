@@ -1,14 +1,15 @@
 import express from "express";
 import { getTown, createTown, updateTown, deleteTown } from "../controllers/town.controller";
 import { TownRepository } from "../repositories/town.repo";
+import { authenticateUser } from "../middleware/auth.middleware";
 
 
 const router = express.Router();
 
-router.get("/", getTown);
-router.post("/", createTown);
-router.patch("/:id", updateTown);
-router.delete("/:id",deleteTown);
+router.get("/",authenticateUser,  getTown);
+router.post("/",authenticateUser,  createTown);
+router.patch("/:id",authenticateUser,  updateTown);
+router.delete("/:id",authenticateUser, deleteTown);
 // router.get('/rename', async (req, res) => {
 //     const oldName = 'town';
 //     const newName = 'towns';

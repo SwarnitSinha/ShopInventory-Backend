@@ -1,8 +1,8 @@
 import { BuyerRepository } from "../repositories/buyer.repo";
 
 export const buyerService = {
-        getAllBuyers: async () => await BuyerRepository.getAllBuyers(),
-        createBuyer: async (data: any) => await BuyerRepository.createBuyer(data),
-        updateBuyer: async (id: string,data: any) => await BuyerRepository.updateBuyer(data,id),
-        deleteBuyer: async (id: any) => await BuyerRepository.deleteBuyer(id),
+        getAllBuyers: async (shopId: string) => await BuyerRepository.getAllBuyers(shopId),
+        createBuyer: async (data: any,shopId: string) => await BuyerRepository.createBuyer(data,shopId),
+        updateBuyer: async (id: string,data: any, shopId: string) => await BuyerRepository.updateBuyer(data,id,shopId),
+        deleteBuyer: async (id: any, shopId: string) => await BuyerRepository.deleteBuyer(id,shopId),
 };

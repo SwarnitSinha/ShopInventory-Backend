@@ -1,13 +1,19 @@
 import { Product } from "../models/product.model";
-
+import mongoose from 'mongoose';
 export const ProductRepository = {
-        getAllProducts: async () => {
-                const products = await Product.find({isDeleted: false}).sort({ name: 1 });
-                return products.map(product => ({
-                        ...product.toObject(),
-                        id: product._id,
-                        _id: undefined, // Remove _id from response
-                    }));
+        getAllProducts: async (shopId: string) => {
+                const products = await Product.find({
+                        shopId: new mongoose.Types.ObjectId(shopId),
+                        isDeleted: false
+                    }).sort({ name: 1 });
+
+                    return products.map(product => {
+                        const { _id, ...rest } = product.toObject();
+                        return {
+                            ...rest,
+                            id: _id
+                        };
+                    });
         },
         createProduct: async (data: any) => {
 

@@ -3,8 +3,8 @@ import { Town } from "../models/town.model"; // Import the Town model if not alr
 
 export const BuyerRepository = {
   // Retrieve all buyers
-  getAllBuyers: async () => {
-    const buyers = await Buyer.find()
+  getAllBuyers: async (shopId: string) => {
+    const buyers = await Buyer.find({shopId: shopId})
         .populate('town')
         .sort({name: 1});
     return buyers.map(buyer => ({
@@ -15,20 +15,21 @@ export const BuyerRepository = {
   },
 
   // Create a new buyer
-  createBuyer: async (data: any) => {
+  createBuyer: async (data: any, shopId: string) => {
     if (data.townId) {
       const town = await Town.findById(data.townId);
       if (!town) throw new Error("Invalid townId");
       data.town = town._id; // Map townId to town
       delete data.townId; // Remove townId from the data object
     }
+    data.shopId = shopId; // Set the shopId for the new buyer
     const newBuyer = new Buyer(data);
     await newBuyer.save();
     return { ...newBuyer.toObject(), id: newBuyer._id.toString(), _id: undefined };
   },
 
   // Update an existing buyer by ID
-  updateBuyer: async (id: string, data: any) => {
+  updateBuyer: async (id: string, data: any, shopId: string) => {
     if (data.townId) {
       const town = await Town.findById(data.townId);
       if (!town) throw new Error("Invalid townId");
@@ -41,7 +42,7 @@ export const BuyerRepository = {
   },
 
   // Delete a buyer by ID
-  deleteBuyer: async (id: string) => {
+  deleteBuyer: async (id: string, shopId: string) => {
     const deletedBuyer = await Buyer.findByIdAndDelete(id);
     if (!deletedBuyer) throw new Error("Buyer not found");
     return { message: "Buyer deleted successfully" };

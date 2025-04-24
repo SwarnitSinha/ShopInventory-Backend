@@ -10,6 +10,7 @@ export interface ISaleProduct {
 
 // Interface for the Sale document
 export interface ISale extends Document {
+  shopId: mongoose.Types.ObjectId | string,
   invoiceNumber: string;
   products: ISaleProduct[];
   buyer: mongoose.Types.ObjectId | string;
@@ -55,6 +56,11 @@ function generateInvoiceNumber() {
 
 // Create the schema for sales
 const SaleSchema = new Schema<ISale>({
+  shopId: {
+    type: Schema.Types.ObjectId,
+    ref: 'Shop',
+    required: [true, 'Shop is required']
+  },
   invoiceNumber: {
     type: String,
     required: true,

@@ -6,6 +6,7 @@ import { Buyer } from '../models/buyer.model';
 import { Town } from '../models/town.model';
 
 export interface InsertSaleDto {
+  shopId: string;
   products: Array<{
     product: string;
     quantity: number;
@@ -21,6 +22,7 @@ export interface InsertSaleDto {
 
 // This interface represents the data coming from the frontend
 export interface InsertSaleDto {
+  shopId: string;
   products: Array<{
     product: string;
     quantity: number;
@@ -36,6 +38,7 @@ export interface InsertSaleDto {
 
 // This interface represents update data
 export interface UpdateSaleDto {
+  shopId: string;
   products?: Array<{
     product: string;
     quantity: number;
@@ -61,7 +64,7 @@ export const SaleService = {
    * @param params Pagination parameters
    * @returns Sales with pagination metadata
    */
-  async getAllSales(params: PaginationParams = {}) {
+  async getAllSales(params: PaginationParams = {},  shopId: string) {
     try {
       const page = params.page ? Number(params.page) : 1;
       const limit = params.limit ? Number(params.limit) : 10;
@@ -73,7 +76,7 @@ export const SaleService = {
       if (isNaN(limit) || limit < 1 || limit > 100) {
         throw new Error('Invalid limit parameter (must be between 1 and 100)');
       }
-      return await SaleRepository.getAllSales(page, limit);
+      return await SaleRepository.getAllSales(page, limit, shopId);
     } catch (error) {
       throw new Error(`Service error: ${error instanceof Error ? error.message : String(error)}`);
     }
@@ -84,9 +87,9 @@ export const SaleService = {
    * @param id Sale ID
    * @returns The sale if found
    */
-  async getSaleById(id: string): Promise<ISale> {
+  async getSaleById(id: string,  shopId: string): Promise<ISale> {
     try {
-      const sale = await SaleRepository.getSaleById(id);
+      const sale = await SaleRepository.getSaleById(id, shopId);
 
       if (!sale) {
         throw new Error(`Sale with ID ${id} not found`);
@@ -99,7 +102,7 @@ export const SaleService = {
   },
 
   // Create a new sale
-  async createSale(saleData: InsertSaleDto): Promise<ISale> {
+  async createSale(saleData: InsertSaleDto,  shopId: string): Promise<ISale> {
     try {
       // Convert string IDs to ObjectIds
       const preparedData = {
@@ -127,7 +130,7 @@ export const SaleService = {
       await product.save(); // Save updated product
     }
 
-      return await SaleRepository.createSale(preparedData);
+      return await SaleRepository.createSale(preparedData, shopId);
 
     } catch (error) {
       throw new Error(`Service error: ${error instanceof Error ? error.message : String(error)}`);
@@ -140,7 +143,7 @@ export const SaleService = {
   * @param updateData Data to update the sale with
   * @returns The updated sale
   */
-  async updateSale(id: string, updateData: UpdateSaleDto): Promise<ISale> {
+  async updateSale(id: string, updateData: UpdateSaleDto,  shopId: string): Promise<ISale> {
     try {
       // Prepare data - handle ObjectIds and Date conversions
       const preparedData: any = { ...updateData };
@@ -163,7 +166,7 @@ export const SaleService = {
         preparedData.saleDate = new Date(updateData.saleDate);
       }
 
-      const updatedSale = await SaleRepository.updateSale(id, preparedData);
+      const updatedSale = await SaleRepository.updateSale(id, preparedData, shopId);
 
       if (!updatedSale) {
         throw new Error(`Sale with ID ${id} not found`);
@@ -175,18 +178,9 @@ export const SaleService = {
     }
   },
 
-  // Update a sale by ID
-  // updateSale: async (id: string, data: any) => {
-  //   const updatedSale = await SaleRepository.updateSale(id, data);
-  //   if (!updatedSale) {
-  //     throw new Error('Sale not found');
-  //   }
-  //   return updatedSale;
-  // },
-
   // Soft delete a sale by ID
-  deleteSale: async (data: any) => {
-    const deletedSale = await SaleRepository.deleteSale(data);
+  deleteSale: async (data: any,  shopId: string) => {
+    const deletedSale = await SaleRepository.deleteSale(data, shopId);
     if (!deletedSale) {
       throw new Error('Sale not found');
     }
@@ -194,8 +188,9 @@ export const SaleService = {
   },
 
   // Search sales by filters
-  searchSales: async (filters: any) => {
+  searchSales: async (filters: any,  shopId: string) => {
     const query: any = {};
+    query.shopId = shopId; // Ensure shopId is included in the query
 
     if (filters.startDate || filters.endDate) {
       query.saleDate = {};
