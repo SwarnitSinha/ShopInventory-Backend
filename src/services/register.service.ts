@@ -1,19 +1,51 @@
 import { scrypt, randomBytes } from "crypto";
 import { promisify } from "util";
-import { User } from "../models/user.model";
+import { Shop } from "../models/shop.model";
+import jwt from "jsonwebtoken";
+
 
 const scryptAsync = promisify(scrypt);
 
 export const RegisterService = {
-  async createUser(userData: { username: string; password: string; role: string }) {
-    const existingUser = await User.findOne({ username: userData.username });
-    if (existingUser) throw new Error("User already exists");
+  async createShop(userData: { shopName:string, ownerName: string, email: string, username: string; password: string; role: string }) {
+    try{
+      console.log("Creating shop with data:", userData);
+      const existingUser = await Shop.findOne({ username: userData.username });
+      if (existingUser) throw new Error("Shop already exists");
+  
+      const hashedPassword = await hashPassword(userData.password); // Hash password
+      const newShop = new Shop({ ...userData, password: hashedPassword, activeScreen: 0 });
+      await newShop.save();
+  
+      
+      const shop = await Shop.findOne({ username: userData.username });
+      if (!shop) throw new Error("Something went wrong! Try again later.");
 
-    const hashedPassword = await hashPassword(userData.password); // Hash password
-    const newUser = new User({ ...userData, password: hashedPassword });
-    await newUser.save();
+       // Generate JWT token
+          const token = jwt.sign(
+            { id: shop.id, shopName: shop.shopName, email: shop.email, username: shop.username,ownerName: shop.ownerName },
+            process.env.JWT_SECRET!,
+            { expiresIn: "4d" }
+          );
+          shop.activeScreen += 1;
+          await shop.save();
+          console.log("RETURNING:: ", shop.ownerName);
+      return { token, shop: { id: shop.id, shopName: shop.shopName, email: shop.email, username: shop.username, ownerName: shop.ownerName} };
+    }
+    catch(err){
+      console.log("Error in creating shop", err);
+    }
+    
+  },
 
-    return { id: newUser.id, username: newUser.username, role: newUser.role };
+  async validateUsername(username: string) {
+    try {
+      const existingUser = await Shop.findOne({ username });
+      if (existingUser) return false;
+      return true;
+    } catch (error) {
+      throw new Error("Error validating username: " + error);
+    }
   },
 };
 
