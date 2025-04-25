@@ -24,6 +24,11 @@ app.use(cors({
 
 app.use(express.json());
 
+app.use((req, res, next) => {
+    console.log('Full URL:', `${req.protocol}://${req.get('host')}${req.originalUrl}`);
+    next();
+  });
+
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);

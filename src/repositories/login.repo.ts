@@ -1,5 +1,5 @@
-import { User } from "../models/user.model"
+import { Shop } from "../models/shop.model"
 
 export const LoginRepository = {
-    validateUser: async (data: any) => await User.find()
+    validateUser: async (data: any) => await Shop.find()
 }

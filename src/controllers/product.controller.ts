@@ -1,9 +1,12 @@
 import { Request, Response } from "express";
 import { ProductService } from "../services/product.service";
+import { extractShopId } from "../utils/extractDetailsFromReq";
 
 export const getProducts = async (_req: Request, res: Response) => {
     try {
-        const products = await ProductService.getAllProducts();
+        const shopId = extractShopId(_req, res);
+              if (!shopId) return;
+        const products = await ProductService.getAllProducts(shopId);
         res.json(products);
     } catch (error) {
         console.error("Error in getProducts:", error);
@@ -13,6 +16,8 @@ export const getProducts = async (_req: Request, res: Response) => {
 
 export const createProduct = async (req: Request, res: Response) => {
     try {
+        const shopId = extractShopId(req, res);
+              if (!shopId) return;
         const { name, description, quantity, purchasePrice, regularPrice, bulkPrice } = req.body;
 
         // Handle the uploaded file
@@ -20,6 +25,7 @@ export const createProduct = async (req: Request, res: Response) => {
 
         const productData = {
             name,
+            shopId,
             description,
             quantity: Number(quantity),
             purchasePrice: Number(purchasePrice),
@@ -41,11 +47,15 @@ export const updateProduct = async (req: Request, res: Response) => {
         const { id } = req.params;
         const { name, description, quantity, purchasePrice, regularPrice, bulkPrice } = req.body;
 
+        const shopId = extractShopId(req, res);
+      if (!shopId) return;
+
         // Handle the uploaded file
         const imageUrl = req.file ? `/uploads/${req.file.filename}` : undefined;
 
         const productData = {
             name,
+            shopId,
             description,
             quantity: Number(quantity),
             purchasePrice: Number(purchasePrice),

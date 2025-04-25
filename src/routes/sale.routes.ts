@@ -1,6 +1,7 @@
 import express from 'express';
 import { SaleController } from '../controllers/sale.controller';
 import { validateSaleBody, validateObjectId } from '../middleware/validate-request.middleware';
+import { authenticateUser } from '../middleware/auth.middleware';
 
 const router = express.Router();
 
@@ -13,7 +14,7 @@ router.post('/delete/:id', validateObjectId('id'), SaleController.deleteSale);
  * @access Private
  */
 router.get(
-    '/', 
+    '/', authenticateUser,
     SaleController.getSales.bind(SaleController)
   );
   
@@ -25,12 +26,12 @@ router.get(
    * @access Private
    */
   router.post(
-    '/',
+    '/', authenticateUser,
     validateSaleBody,
     SaleController.createSale.bind(SaleController)
   );
 
-   router.get('/filter',SaleController.searchSales.bind(SaleController));
+   router.get('/filter',authenticateUser, SaleController.searchSales.bind(SaleController));
   
   /**
    * @route GET /api/sales/:id
@@ -38,7 +39,7 @@ router.get(
    * @access Private
    */
   router.get(
-    '/:id', 
+    '/:id', authenticateUser, 
     validateObjectId('id'),
     SaleController.getSaleById.bind(SaleController)
   );
@@ -49,7 +50,7 @@ router.get(
    * @access Private
    */
   router.patch(
-    '/:id',
+    '/:id', authenticateUser,
     validateObjectId('id'),
     SaleController.updateSale.bind(SaleController)
   );
@@ -57,7 +58,7 @@ router.get(
 
 
 // Create a new sale
-router.post( '/',validateSaleBody, SaleController.createSale.bind(SaleController)  );
+router.post( '/',authenticateUser, validateSaleBody, SaleController.createSale.bind(SaleController)  );
 
 
 export default router;
