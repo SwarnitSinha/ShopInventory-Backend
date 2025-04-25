@@ -7,18 +7,18 @@ import jwt from "jsonwebtoken";
 const scryptAsync = promisify(scrypt);
 
 export const RegisterService = {
-  async createShop(userData: { shopName:string, ownerName: string, email: string, username: string; password: string; role: string }) {
+  async createShop(shopData: { shopName:string, ownerName: string, username: string; password: string }) {
     try{
-      console.log("Creating shop with data:", userData);
-      const existingUser = await Shop.findOne({ username: userData.username });
+      console.log("Creating shop with data:", shopData);
+      const existingUser = await Shop.findOne({ username: shopData.username });
       if (existingUser) throw new Error("Shop already exists");
   
-      const hashedPassword = await hashPassword(userData.password); // Hash password
-      const newShop = new Shop({ ...userData, password: hashedPassword, activeScreen: 0 });
+      const hashedPassword = await hashPassword(shopData.password); // Hash password
+      const newShop = new Shop({ ...shopData, password: hashedPassword, activeScreen: 0 });
       await newShop.save();
   
       
-      const shop = await Shop.findOne({ username: userData.username });
+      const shop = await Shop.findOne({ username: shopData.username });
       if (!shop) throw new Error("Something went wrong! Try again later.");
 
        // Generate JWT token
@@ -34,6 +34,7 @@ export const RegisterService = {
     }
     catch(err){
       console.log("Error in creating shop", err);
+      throw err;
     }
     
   },
