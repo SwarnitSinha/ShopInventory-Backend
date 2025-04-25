@@ -8,7 +8,6 @@ declare module "express" {
     user?: {
       id: string;
       shopName: string;
-      email: string;
       username: string;
     };
   }
@@ -25,12 +24,11 @@ export const authenticateUser = (req: Request, res: Response, next: NextFunction
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
       id: string;
       shopName: string;
-      email: string;
       username: string;
     };
     req.user = decoded; // ✅ Assign user data to req.user
     console.log(req.user.shopName);
-    console.log(req.user.email);
+    // console.log(req.user.email);
     console.log(req.user.username);
     console.log(req.user.id);
     next();
