@@ -14,13 +14,33 @@ export const TownRepository = {
 
   // Create a new town
   createTown: async (data: any) => {
-    data.country = "India";
-    data.createdAt = new Date();
-    data.updatedAt = new Date();
-    const newTown = new Town(data);
-    await newTown.save();
-    return { ...newTown.toObject(), id: newTown._id.toString(), _id: undefined };
-  },
+    const { name, district, state, country = "India", shopId } = data;
+
+    // Split the comma-separated names into an array
+    const townNames = name.split(",").map((townName: string) => townName.trim());
+
+    // Prepare an array of town objects to be inserted
+    const townsToCreate = townNames.map((townName: string) => ({
+        name: townName,
+        district,
+        state,
+        country,
+        shopId,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        isDeleted: false,
+    }));
+
+    // Insert all towns in one operation
+    const createdTowns = await Town.insertMany(townsToCreate);
+
+    // Return the created towns with formatted response
+    return createdTowns.map((town) => ({
+        ...town.toObject(),
+        id: town._id.toString(),
+        _id: undefined, // Remove _id from response
+    }));
+},
 
   // Update an existing town by ID
   updateTown: async (id: string, data: any) => {

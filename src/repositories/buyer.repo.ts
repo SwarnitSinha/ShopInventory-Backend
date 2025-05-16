@@ -16,19 +16,42 @@ export const BuyerRepository = {
 
   // Create a new buyer
   createBuyer: async (data: any, shopId: string) => {
-    if (data.townId) {
-      const town = await Town.findById(data.townId);
-      if (!town) throw new Error("Invalid townId");
-      data.town = town._id; // Map townId to town
-      delete data.townId; // Remove townId from the data object
+    const { name, townId, phone, type } = data;
+
+    // Validate the townId
+    if (!townId) {
+        throw new Error("Town ID is required");
     }
-    data.createdAt = new Date(); // Set the createdAt field
-    data.updatedAt = new Date(); // Set the updatedAt field
-    data.shopId = shopId; // Set the shopId for the new buyer
-    const newBuyer = new Buyer(data);
-    await newBuyer.save();
-    return { ...newBuyer.toObject(), id: newBuyer._id.toString(), _id: undefined };
-  },
+    const town = await Town.findById(townId);
+    if (!town) {
+        throw new Error("Invalid townId");
+    }
+
+    // Split the comma-separated names into an array
+    const buyerNames = name.split(",").map((buyerName: string) => buyerName.trim());
+
+    // Prepare an array of buyer objects to be inserted
+    const buyersToCreate = buyerNames.map((buyerName: string) => ({
+        name: buyerName,
+        shopId,
+        phone,
+        type,
+        town: town._id, // Map townId to town
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        isDeleted: false,
+    }));
+
+    // Insert all buyers in one operation
+    const createdBuyers = await Buyer.insertMany(buyersToCreate);
+
+    // Return the created buyers with formatted response
+    return createdBuyers.map((buyer) => ({
+        ...buyer.toObject(),
+        id: buyer._id.toString(),
+        _id: undefined, // Remove _id from response
+    }));
+},
 
   // Update an existing buyer by ID
   updateBuyer: async (id: string, data: any, shopId: string) => {
